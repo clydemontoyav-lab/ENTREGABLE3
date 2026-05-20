@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FED CAMPO — Wanka Willka Intelligence v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root {
+  --bg:#060C18;--bg2:#0C1726;--bg3:#111E30;
+  --border:#1E3348;--border2:#2D5070;
+  --blue:#1A73E8;--blue2:#4DA3FF;
+  --green:#00C851;--yellow:#FFD700;--red:#FF4444;--purple:#BF7AFF;
+  --text:#F0F4FF;--text2:#8AB0D4;--text3:#4A6A8A;
+  --radius:12px;--radius2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;font-size:14px;line-height:1.6;}
+.header{background:linear-gradient(135deg,#0A1422,#080E1F);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.logo{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1A73E8,#00C851);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px rgba(26,115,232,0.4);flex-shrink:0;}
+.header-title{font-size:15px;font-weight:700;color:var(--blue2);letter-spacing:-.3px;}
+.header-sub{font-size:10px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.main{padding:16px;max-width:680px;margin:0 auto;}
+.steps{display:flex;gap:0;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.step{flex:1;padding:10px 6px;text-align:center;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;border-right:1px solid var(--border);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.step:last-child{border-right:none;}
+.step.active{background:rgba(26,115,232,.12);color:var(--blue2);}
+.step.done{color:var(--green);}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.step.active .step-num{background:var(--blue);border-color:var(--blue);color:#fff;}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:#fff;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:700;color:var(--blue2);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+label{display:block;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+input[type=text],textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius2);color:var(--text);font-family:inherit;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,115,232,.15);}
+textarea{resize:vertical;min-height:90px;line-height:1.6;}
+select option{background:var(--bg2);}
+.form-row{margin-bottom:14px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--blue);background:rgba(26,115,232,.06);}
+.upload-zone .icon{font-size:28px;margin-bottom:6px;}
+.upload-zone p{font-size:12px;color:var(--text2);}
+.upload-zone strong{color:var(--blue2);}
+/* PHOTO GALLERY */
+.photo-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+.photo-item{position:relative;border-radius:var(--radius2);overflow:hidden;aspect-ratio:1;background:var(--bg3);border:1px solid var(--border);}
+.photo-item img{width:100%;height:100%;object-fit:cover;}
+.photo-item .remove{position:absolute;top:4px;right:4px;background:rgba(255,68,68,.9);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.photo-item .caption-input{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);border:none;color:#fff;font-size:10px;padding:3px 6px;font-family:inherit;outline:none;width:100%;}
+.photo-count{font-size:11px;color:var(--text2);margin-top:6px;}
+/* RECORD */
+.record-wrap{display:flex;gap:10px;align-items:flex-start;}
+.btn-record{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:var(--red);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;box-shadow:0 0 0 0 rgba(255,68,68,.4);}
+.btn-record.recording{animation:recordPulse 1.2s infinite;background:#cc0000;}
+@keyframes recordPulse{0%{box-shadow:0 0 0 0 rgba(255,68,68,.5)}70%{box-shadow:0 0 0 12px rgba(255,68,68,0)}100%{box-shadow:0 0 0 0 rgba(255,68,68,0)}}
+.record-timer{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--text);letter-spacing:2px;}
+.record-status{font-size:11px;color:var(--text2);margin-top:2px;}
+audio{width:100%;margin-top:10px;border-radius:var(--radius2);}
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);transition:all .15s;background:rgba(26,115,232,.1);color:var(--text2);}
+.tag:hover{border-color:var(--blue2);color:var(--blue2);}
+.tag.selected{background:rgba(26,115,232,.2);border-color:var(--blue);color:var(--blue2);}
+.tag.salud.selected{background:rgba(0,200,81,.15);border-color:var(--green);color:var(--green);}
+.tag.agua.selected{background:rgba(77,163,255,.15);border-color:var(--blue2);color:var(--blue2);}
+.tag.edu.selected{background:rgba(255,215,0,.15);border-color:var(--yellow);color:var(--yellow);}
+.tag.art.selected{background:rgba(191,122,255,.15);border-color:var(--purple);color:var(--purple);}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--radius2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(26,115,232,.3);}
+.btn-primary:hover{background:#1557B0;transform:translateY(-1px);}
+.btn-primary:disabled{background:var(--bg3);color:var(--text3);box-shadow:none;transform:none;cursor:not-allowed;}
+.btn-secondary{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);}
+.btn-secondary:hover{border-color:var(--blue2);color:var(--blue2);}
+.btn-success{background:var(--green);color:#000;font-weight:700;}
+.btn-success:hover{background:#00a844;transform:translateY(-1px);}
+.btn-word{background:linear-gradient(135deg,#2B579A,#1a3d6e);color:#fff;font-weight:700;box-shadow:0 4px 14px rgba(43,87,154,.4);}
+.btn-word:hover{background:linear-gradient(135deg,#1a3d6e,#102a52);transform:translateY(-1px);}
+/* LOADING */
+.loading{display:none;text-align:center;padding:30px;}
+.loading.show{display:block;}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--blue);animation:spin .8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:13px;color:var(--text2);}
+.loading-step{font-size:11px;color:var(--text3);padding:3px 0;transition:color .3s;}
+.loading-step.active{color:var(--blue2);}
+.loading-step.done{color:var(--green);}
+/* OUTPUT */
+.output{display:none;}
+.output.show{display:block;}
+.output-header{background:linear-gradient(135deg,rgba(0,200,81,.1),rgba(26,115,232,.1));border:1px solid rgba(0,200,81,.3);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.output-icon{font-size:22px;}
+.output-title{font-size:14px;font-weight:700;color:var(--green);}
+.output-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.section-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.section-hdr{background:var(--bg3);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.section-hdr-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.6px;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.section-body{padding:14px;font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap;}
+.copy-btn{background:rgba(26,115,232,.12);border:1px solid rgba(26,115,232,.3);color:var(--blue2);border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.copy-btn:hover{background:rgba(26,115,232,.25);}
+.copy-btn.copied{background:rgba(0,200,81,.2);border-color:rgba(0,200,81,.4);color:var(--green);}
+/* EVIDENCES PREVIEW */
+.evidence-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;}
+.ev-thumb{border-radius:var(--radius2);overflow:hidden;aspect-ratio:1;border:1px solid var(--border);}
+.ev-thumb img{width:100%;height:100%;object-fit:cover;}
+.ev-caption{font-size:10px;color:var(--text3);text-align:center;padding:3px;background:var(--bg3);}
+.btn-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+/* WORD DOWNLOAD BANNER */
+.word-banner{background:linear-gradient(135deg,rgba(43,87,154,.2),rgba(26,115,232,.15));border:1px solid rgba(43,87,154,.5);border-radius:var(--radius);padding:16px;margin-bottom:14px;text-align:center;}
+.word-banner-title{font-size:14px;font-weight:700;color:#7EB3FF;margin-bottom:4px;}
+.word-banner-sub{font-size:11px;color:var(--text2);margin-bottom:12px;}
+.footer{text-align:center;padding:16px;color:var(--text3);font-size:10px;letter-spacing:.3px;border-top:1px solid var(--border);margin-top:20px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:700;transition:transform .3s;z-index:999;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr;}.main{padding:12px;}.photo-gallery{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">🏔</div>
+    <div>
+      <div class="header-title">FED CAMPO — WANKA WILLKA</div>
+      <div class="header-sub">Intelligence v2 · Con evidencias · DGIPAT-MIDIS · 2026</div>
+    </div>
+  </div>
+  <div class="live-dot"></div>
+</header>
+
+<main class="main">
+
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div>Actividad</div>
+    <div class="step" id="step2"><div class="step-num">2</div>Fotos</div>
+    <div class="step" id="step3"><div class="step-num">3</div>Audio</div>
+    <div class="step" id="step4"><div class="step-num">4</div>Generar</div>
+    <div class="step" id="step5"><div class="step-num">5</div>Word ⬇</div>
+  </div>
+
+  <!-- PASO 1 -->
+  <div class="card" id="pane1">
+    <div class="card-title"><span>📋</span> Datos de la Actividad</div>
+    <div class="form-grid">
+      <div><label>Fecha</label><input type="text" id="fecha" placeholder="ej. 19 de mayo de 2026"></div>
+      <div><label>Hora</label><input type="text" id="hora" placeholder="ej. 09:00 h"></div>
+    </div>
+    <div class="form-row">
+      <label>Ítem TDR</label>
+      <select id="item">
+        <option value="">— Selecciona el ítem —</option>
+        <option value="c">Ítem c) Gestionar reuniones de coordinación con el Equipo Técnico del FED</option>
+        <option value="d">Ítem d) Participar en las coordinaciones interinstitucionales que realice el Gobierno Regional</option>
+        <option value="e">Ítem e) Organizar y conducir talleres o reuniones de análisis de información</option>
+        <option value="f">Ítem f) Elaborar, analizar y socializar los reportes de avance de los indicadores y recursos</option>
+        <option value="g">Ítem g) Realizar el monitoreo continuo y reportar el estado de la implementación de los compromisos y acuerdos asumidos</option>
+        <option value="h">Ítem h) Coordinar con los Gobiernos Locales la implementación del PNDIS al 2030</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Lugar / Entidad</label>
+      <input type="text" id="lugar" placeholder="ej. DIRESA Huancavelica — Sala de reuniones">
+    </div>
+    <div class="form-row">
+      <label>Indicadores relacionados</label>
+      <div class="tags">
+        <span class="tag salud" onclick="toggleTag(this,'SI-01.01')">SI-01.01</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-01.02')">SI-01.02</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-01.03')">SI-01.03</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-02.01')">SI-02.01</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-02.02')">SI-02.02</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-02.03')">SI-02.03</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-02.04')">SI-02.04</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-03.01')">SI-03.01</span>
+        <span class="tag salud" onclick="toggleTag(this,'SI-03.02')">SI-03.02</span>
+        <span class="tag salud" onclick="toggleTag(this,'VI-01.01')">VI-01.01</span>
+        <span class="tag salud" onclick="toggleTag(this,'VI-01.02')">VI-01.02</span>
+        <span class="tag edu" onclick="toggleTag(this,'EI-01')">EI-01</span>
+        <span class="tag edu" onclick="toggleTag(this,'EI-02')">EI-02</span>
+        <span class="tag edu" onclick="toggleTag(this,'EI-03')">EI-03</span>
+        <span class="tag agua" onclick="toggleTag(this,'AI-01.01')">AI-01.01</span>
+        <span class="tag agua" onclick="toggleTag(this,'AI-02')">AI-02</span>
+        <span class="tag agua" onclick="toggleTag(this,'AI-03')">AI-03</span>
+        <span class="tag agua" onclick="toggleTag(this,'AI-04')">AI-04</span>
+        <span class="tag agua" onclick="toggleTag(this,'AI-05')">AI-05</span>
+        <span class="tag art" onclick="toggleTag(this,'ART-01')">ART-01</span>
+        <span class="tag salud" onclick="toggleTag(this,'MC-01')">MC-01</span>
+        <span class="tag salud" onclick="toggleTag(this,'MC-02')">MC-02</span>
+        <span class="tag salud" onclick="toggleTag(this,'MC-03')">MC-03</span>
+        <span class="tag edu" onclick="toggleTag(this,'MC-04')">MC-04</span>
+        <span class="tag edu" onclick="toggleTag(this,'MC-05')">MC-05</span>
+        <span class="tag edu" onclick="toggleTag(this,'MC-06')">MC-06</span>
+        <span class="tag edu" onclick="toggleTag(this,'MC-07')">MC-07</span>
+        <span class="tag agua" onclick="toggleTag(this,'MC-08')">MC-08</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Descripción de la actividad</label>
+      <textarea id="descripcion" placeholder="Escribe en tus palabras lo que hiciste. Ej: Visité la DIRESA para verificar datos HIS del SI-01.01, revisé registros con el jefe de estadística, se identificaron 3 EESS con rezago..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Acuerdos / compromisos</label>
+      <textarea id="acuerdos" placeholder="Ej:&#10;- DIRESA reportará HIS antes del 15 de cada mes&#10;- Responsable: Jefe Estadística&#10;- Plazo: 31 mayo 2026"></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="goToStep(2)">Siguiente → Agregar fotos y actas ➜</button>
+  </div>
+
+  <!-- PASO 2: FOTOS -->
+  <div class="card" id="pane2" style="display:none">
+    <div class="card-title"><span>📸</span> Fotos y Evidencias (máx. 3)</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Estas fotos se incrustarán directamente en el Word — visibles, no como link. Agrega pie de foto a cada una.</p>
+
+    <div class="upload-zone" id="dropzone2"
+         onclick="document.getElementById('photoInput').click()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="handlePhotoDrop(event)">
+      <div class="icon">📁</div>
+      <p><strong>Toca para agregar fotos</strong></p>
+      <p style="font-size:11px;margin-top:4px">JPG, PNG, PDF — máx. 3 archivos · 5MB c/u</p>
+    </div>
+    <input type="file" id="photoInput" multiple accept="image/*" style="display:none" onchange="handlePhotos(this.files)">
+
+    <div class="photo-gallery" id="photoGallery"></div>
+    <div class="photo-count" id="photoCount"></div>
+
+    <div style="margin-top:14px">
+      <label>📄 Acta / documento escaneado (imagen)</label>
+      <div class="upload-zone" onclick="document.getElementById('actaInput').click()">
+        <div class="icon">📋</div>
+        <p><strong>Subir acta o documento</strong></p>
+        <p style="font-size:11px;margin-top:4px">Se insertará como imagen en el Word</p>
+      </div>
+      <input type="file" id="actaInput" accept="image/*" style="display:none" onchange="handleActa(this)">
+      <div id="actaPreview"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-secondary" onclick="goToStep(1)" style="flex:1">← Atrás</button>
+      <button class="btn btn-primary" onclick="goToStep(3)" style="flex:2">Siguiente → Audio ➜</button>
+    </div>
+  </div>
+
+  <!-- PASO 3: AUDIO -->
+  <div class="card" id="pane3" style="display:none">
+    <div class="card-title"><span>🎙️</span> Resumen de Voz o Transcripción</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Graba un resumen verbal de 1-2 minutos O pega la transcripción. Si no tienes audio, solo completa la transcripción abajo.</p>
+
+    <div class="record-wrap">
+      <button class="btn-record" id="btnRecord" onclick="toggleRecording()">🎙️</button>
+      <div>
+        <div class="record-timer" id="timer">00:00</div>
+        <div class="record-status" id="recordStatus">Toca para grabar</div>
+      </div>
+    </div>
+    <div id="audioPreview" style="display:none">
+      <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <div class="form-row" style="margin-top:14px">
+      <label>📄 Transcripción (Tactiq, YouTube VTT, resumen WhatsApp)</label>
+      <textarea id="transcripcion" rows="5" placeholder="Pega aquí la transcripción o escribe un resumen de lo que se trató en la reunión..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" onclick="goToStep(2)" style="flex:1">← Atrás</button>
+      <button class="btn btn-primary" onclick="goToStep(4)" style="flex:2">Siguiente → Generar ➜</button>
+    </div>
+  </div>
+
+  <!-- PASO 4: GENERAR -->
+  <div class="card" id="pane4" style="display:none">
+    <div class="card-title"><span>⚡</span> Generar Informe Técnico</div>
+    <div id="resumen-preview" style="background:var(--bg3);border-radius:var(--radius2);padding:12px;margin-bottom:14px;font-size:12px;line-height:1.8;color:var(--text2)"></div>
+    <div class="form-row">
+      <label>Datos adicionales (opcional)</label>
+      <textarea id="adicional" rows="3" placeholder="Agrega algo más si necesitas..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="goToStep(3)" style="flex:1;min-width:100px">← Atrás</button>
+      <button class="btn btn-secondary" onclick="copiarPrompt()" style="flex:1;min-width:110px">📋 Copiar prompt</button>
+      <button class="btn btn-primary" onclick="generarInforme()" style="flex:2;min-width:130px">⚡ Generar</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-msg">Procesando con inteligencia FED-MIDIS...</div>
+    <div style="margin-top:12px">
+      <div class="loading-step" id="ls1">📋 Analizando actividad y datos...</div>
+      <div class="loading-step" id="ls2">📊 Contrastando fichas técnicas FED...</div>
+      <div class="loading-step" id="ls3">🏛️ Aplicando marco PNDIS al 2030...</div>
+      <div class="loading-step" id="ls4">✍️ Redactando informe institucional...</div>
+      <div class="loading-step" id="ls5">📄 Preparando documento Word...</div>
+    </div>
+  </div>
+
+  <!-- PASO 5: RESULTADO + DESCARGA WORD -->
+  <div class="output" id="output">
+
+    <div class="output-header">
+      <div class="output-icon">✅</div>
+      <div>
+        <div class="output-title">Informe generado con evidencias</div>
+        <div class="output-sub" id="output-meta">Listo para descargar como Word</div>
+      </div>
+    </div>
+
+    <div class="word-banner">
+      <div class="word-banner-title">📄 Documento Word con fotos incrustadas</div>
+      <div class="word-banner-sub">El archivo incluye título, párrafos, fotos visibles, acta y pie de fuente — listo para pegar en el tercer entregable</div>
+      <button class="btn btn-word" onclick="descargarWord()" style="width:100%">
+        ⬇️ Descargar .docx con evidencias
+      </button>
+    </div>
+
+    <div class="section-block">
+      <div class="section-hdr">
+        <div class="section-hdr-title">🏷️ TÍTULO + BAJADA</div>
+        <button class="copy-btn" onclick="copySection('out-titulo',this)">Copiar</button>
+      </div>
+      <div class="section-body" id="out-titulo"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-hdr">
+        <div class="section-hdr-title">📅 FECHA + PÁRRAFOS</div>
+        <button class="copy-btn" onclick="copySection('out-parrafo',this)">Copiar</button>
+      </div>
+      <div class="section-body" id="out-parrafo"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-hdr">
+        <div class="section-hdr-title">🖼️ EVIDENCIAS QUE SE INCLUYEN EN EL WORD</div>
+      </div>
+      <div style="padding:12px">
+        <div class="evidence-preview" id="evidencePreview"></div>
+        <div id="actaThumb" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-hdr">
+        <div class="section-hdr-title">🔗 REFERENCIA + EVIDENCIA</div>
+        <button class="copy-btn" onclick="copySection('out-referencia',this)">Copiar</button>
+      </div>
+      <div class="section-body" id="out-referencia"></div>
+    </div>
+
+    <div class="btn-actions">
+      <button class="btn btn-secondary" onclick="copiarTodo()">📋 Copiar texto</button>
+      <button class="btn btn-word" onclick="descargarWord()">⬇️ Descargar Word</button>
+      <button class="btn btn-success" onclick="nuevaActividad()">+ Nueva actividad</button>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  FED CAMPO INTELLIGENCE v2 · WANKA WILLKA · DGIPAT-MIDIS · Huancavelica 2026 · Evidencias incrustadas en Word
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ITEM_LABELS = {
+  c:'Ítem c) Gestionar reuniones de coordinación con el Equipo Técnico del FED',
+  d:'Ítem d) Participar en las coordinaciones interinstitucionales que realice el Gobierno Regional',
+  e:'Ítem e) Organizar y conducir talleres o reuniones de análisis de información',
+  f:'Ítem f) Elaborar, analizar y socializar los reportes de avance de los indicadores y recursos',
+  g:'Ítem g) Realizar el monitoreo continuo y reportar el estado de la implementación de los compromisos y acuerdos asumidos',
+  h:'Ítem h) Coordinar con los Gobiernos Locales la implementación del PNDIS al 2030'
+};
+
+let S = {
+  step:1, fecha:'', hora:'', item:'', lugar:'',
+  indicadores:[], descripcion:'', acuerdos:'',
+  transcripcion:'', adicional:'',
+  photos:[], photoCaptions:[], actaFile:null,
+  audioBlob:null, recording:false,
+  mediaRecorder:null, timerInterval:null, seconds:0,
+  generatedText:{ titulo:'', parrafo:'', referencia:'' }
+};
+
+// ── NAVIGATION ──
+function goToStep(n) {
+  collectData();
+  if(n>1 && !S.item){ showToast('⚠️ Selecciona el ítem TDR'); return; }
+  if(n>1 && !S.descripcion.trim()){ showToast('⚠️ Describe la actividad'); return; }
+  if(n>1 && !S.fecha.trim()){ showToast('⚠️ Ingresa la fecha'); return; }
+  for(let i=1;i<=4;i++){
+    const p=document.getElementById('pane'+i);
+    if(p) p.style.display='none';
+  }
+  for(let i=1;i<=5;i++){
+    const s=document.getElementById('step'+i);
+    s.classList.remove('active','done');
+    if(i<n) s.classList.add('done');
+    else if(i===n) s.classList.add('active');
+  }
+  S.step=n;
+  if(n<=4){ document.getElementById('pane'+n).style.display='block'; }
+  if(n===4) buildPreview();
+}
+
+function collectData(){
+  S.fecha=document.getElementById('fecha').value;
+  S.hora=document.getElementById('hora').value;
+  S.item=document.getElementById('item').value;
+  S.lugar=document.getElementById('lugar').value;
+  S.descripcion=document.getElementById('descripcion').value;
+  S.acuerdos=document.getElementById('acuerdos').value;
+  S.transcripcion=document.getElementById('transcripcion').value;
+  S.adicional=document.getElementById('adicional')?.value||'';
+}
+
+// ── TAGS ──
+function toggleTag(el,code){
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected')){
+    if(!S.indicadores.includes(code)) S.indicadores.push(code);
+  } else {
+    S.indicadores=S.indicadores.filter(i=>i!==code);
+  }
+}
+
+// ── PHOTOS ──
+function handlePhotos(files){
+  Array.from(files).forEach(f=>{
+    if(S.photos.length>=3){ showToast('⚠️ Máximo 3 fotos'); return; }
+    if(f.size>5*1024*1024){ showToast('⚠️ Foto muy grande, máx. 5MB'); return; }
+    S.photos.push(f);
+    S.photoCaptions.push('');
+  });
+  renderGallery();
+}
+function handlePhotoDrop(e){
+  e.preventDefault();
+  document.getElementById('dropzone2').classList.remove('dragover');
+  handlePhotos(e.dataTransfer.files);
+}
+function renderGallery(){
+  const g=document.getElementById('photoGallery');
+  g.innerHTML=S.photos.map((f,i)=>{
+    const url=URL.createObjectURL(f);
+    return `<div class="photo-item">
+      <img src="${url}" alt="Foto ${i+1}">
+      <button class="remove" onclick="removePhoto(${i})">✕</button>
+      <input class="caption-input" type="text" placeholder="Pie de foto..." value="${S.photoCaptions[i]||''}"
+        onchange="S.photoCaptions[${i}]=this.value" oninput="S.photoCaptions[${i}]=this.value">
+    </div>`;
+  }).join('');
+  document.getElementById('photoCount').textContent=S.photos.length>0?`${S.photos.length}/3 foto(s) agregada(s)`:'';
+}
+function removePhoto(i){
+  S.photos.splice(i,1);
+  S.photoCaptions.splice(i,1);
+  renderGallery();
+}
+function handleActa(input){
+  const f=input.files[0];
+  if(f){
+    S.actaFile=f;
+    const url=URL.createObjectURL(f);
+    document.getElementById('actaPreview').innerHTML=`
+      <div style="margin-top:8px;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border)">
+        <img src="${url}" style="width:100%;max-height:200px;object-fit:contain;background:var(--bg3)">
+        <div style="padding:6px 10px;background:var(--bg3);font-size:11px;color:var(--green)">✓ Acta/documento cargado: ${f.name}</div>
+      </div>`;
+  }
+}
+
+// ── AUDIO ──
+async function toggleRecording(){
+  if(!S.recording){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      S.mediaRecorder=new MediaRecorder(stream);
+      const chunks=[];
+      S.mediaRecorder.ondataavailable=e=>chunks.push(e.data);
+      S.mediaRecorder.onstop=()=>{
+        S.audioBlob=new Blob(chunks,{type:'audio/webm'});
+        const url=URL.createObjectURL(S.audioBlob);
+        document.getElementById('audioPlayer').src=url;
+        document.getElementById('audioPreview').style.display='block';
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      S.mediaRecorder.start();
+      S.recording=true; S.seconds=0;
+      document.getElementById('btnRecord').classList.add('recording');
+      document.getElementById('btnRecord').innerHTML='⏹️';
+      document.getElementById('recordStatus').textContent='Grabando... toca para detener';
+      S.timerInterval=setInterval(()=>{
+        S.seconds++;
+        const m=String(Math.floor(S.seconds/60)).padStart(2,'0');
+        const s=String(S.seconds%60).padStart(2,'0');
+        document.getElementById('timer').textContent=m+':'+s;
+      },1000);
+    }catch(e){ showToast('⚠️ No se pudo acceder al micrófono'); }
+  } else {
+    S.mediaRecorder.stop(); S.recording=false;
+    clearInterval(S.timerInterval);
+    document.getElementById('btnRecord').classList.remove('recording');
+    document.getElementById('btnRecord').innerHTML='🎙️';
+    document.getElementById('recordStatus').textContent='Grabación guardada ✓';
+  }
+}
+
+// ── PREVIEW ──
+function buildPreview(){
+  const inds=S.indicadores.length>0?S.indicadores.join(', '):'No especificados';
+  document.getElementById('resumen-preview').innerHTML=`
+    <strong style="color:var(--blue2)">Lo que se procesará:</strong><br><br>
+    📅 <strong>Fecha:</strong> ${S.fecha} ${S.hora?'— '+S.hora:''}<br>
+    📌 <strong>Ítem:</strong> ${ITEM_LABELS[S.item]||S.item}<br>
+    🏢 <strong>Lugar:</strong> ${S.lugar||'No especificado'}<br>
+    📊 <strong>Indicadores:</strong> ${inds}<br>
+    📸 <strong>Fotos:</strong> ${S.photos.length} foto(s) · Acta: ${S.actaFile?'✓':'No'} · Audio: ${S.audioBlob?'✓':'No'}<br>
+    📝 <strong>Actividad:</strong> ${S.descripcion.substring(0,120)}${S.descripcion.length>120?'...':''}
+  `;
+}
+
+// ── PROMPT ──
+const IND_DATA={
+  'SI-01.01':{m:'77.9%',lb:'77.1%',d:'Ene:76.8% Feb:79.9% Mar:81.3% Abr:79.3%'},
+  'SI-01.02':{m:'80.0%',lb:'76.7%',d:'Ene:77.6% Feb:80.5% Mar:84.1% Abr:86.6%'},
+  'SI-01.03':{m:'45.0%',lb:'41.2%',d:'Ene:58.3% Feb:52.8% Mar:56.0% Abr:64.0%'},
+  'SI-02.01':{m:'88.7%',lb:'88.5%',d:'Ene:89.8% Feb:92.7% Mar:88.0% Abr:79.2%'},
+  'SI-02.02':{m:'53.6%',lb:'42.6%',d:'Ene:70.3% Feb:52.2% Mar:70.0% Abr:46.7%'},
+  'SI-02.03':{m:'47.0%',lb:'31.1%',d:'Ene:52.4% Feb:50.0% Mar:50.0% Abr:42.1%'},
+  'SI-02.04':{m:'75.0%',lb:'71.5%',d:'Ene:91.1% Feb:83.9% Mar:82.3% Abr:85.4%'},
+  'SI-03.01':{m:'83.0%',lb:'77.2%',d:'Ene:94.3% Feb:95.1% Mar:84.0% Abr:94.0%'},
+  'SI-03.02':{m:'20.0%',lb:'77.2%',d:'Ene:6.6% Feb:3.0% Mar:1.1% Abr:26.7%'},
+  'VI-01.01':{m:'12.8%',lb:'12.6%',d:'Ene:16.2% Feb:18.5% Mar:18.9% Abr:19.5%'},
+  'VI-01.02':{m:'47.9%',lb:'42.9%',d:'Ene:88.9% Feb:77.8% Mar:67.7% Abr:78.0%'},
+  'EI-01':{m:'67.1%',lb:'28.6%',d:'Abr:100%'},
+  'EI-02':{m:'28.6%',lb:'20.0%',d:'Mar:54.2% Abr:74.2%'},
+  'EI-03':{m:'66.0%',lb:'60.1%',d:'Abr:54.0%'},
+  'AI-01.01':{m:'185 CCPP',lb:'61',d:'Mar:49 CCPP'},
+  'AI-02':{m:'137 CCPP',lb:'0',d:'Ene:458 Feb:458 Mar:339'},
+  'AI-03':{m:'45 sistemas',lb:'41',d:'Mar:33'},
+  'AI-04':{m:'2 CCPP',lb:'0',d:'Abr:1'},
+  'AI-05':{m:'10 IIEE',lb:'0',d:'Abr:12'},
+  'ART-01':{m:'8 acciones',lb:'0',d:'Feb:4 acciones(50%)'},
+  'MC-01':{m:'46.6%',lb:'44.6%',d:'Ene:36.5% Feb:49.6% Mar:33.6% Abr:37.7%'},
+  'MC-02':{m:'75.5%',lb:'73.5%',d:'Ene:47.0% Feb:39.9% Mar:85.4% Abr:87.4%'},
+  'MC-03':{m:'73.0%',lb:'69.6%',d:'Ene:65.0% Feb:80.7% Mar:72.8% Abr:68.0%'},
+  'MC-04':{m:'95.5%',lb:'80.0%',d:'Ene:90.0% Feb:91.0% Mar:92.0% Abr:93.1%'},
+  'MC-05':{m:'87.0%',lb:'84.8%',d:'Abr:84.8%'},
+  'MC-06':{m:'20.6%',lb:'2.3%',d:'Ene-Abr:2.3%(estancado)'},
+  'MC-07':{m:'37.0%',lb:'31.4%',d:'Ene-Abr:31.4%(estancado)'},
+  'MC-08':{m:'81.0%',lb:'81.7%',d:'Mar:50%'},
+};
+const ROL={
+  c:'El consultor gestiona reuniones de coordinación con el Equipo Técnico del FED MIDIS (Coordinador General FED Lima, especialistas DGIPAT de salud/educación/agua, coordinadores territoriales, equipo de monitoreo). Son reuniones INTERNAS MIDIS donde el consultor reporta avances, alertas y compromisos de la región Huancavelica. Verbos: se gestionó, se coordinó, se reportó, se presentó, se acordó.',
+  d:'El consultor participa como INVITADO en coordinaciones convocadas por el Gobierno Regional con entidades implementadoras (DIRESA, DREH, DRVCS, GRDS, municipios, JUNTOS, PCA). El FED NUNCA convoca ni lidera — precisa aspectos técnicos y propicia acuerdos con fechas y responsables. Verbos: se participó, se precisó, se propició, se monitoreó.',
+  e:'El consultor organiza Y conduce talleres o reuniones de análisis de información sobre indicadores FED con sectores implementadores y GRDS. El FED SÍ lidera la conducción. Presenta datos, identifica alertas tempranas, analiza brechas y propone acciones. Verbos: se organizó, se condujo, se presentó, se analizó, se identificaron alertas, se socializó.',
+  f:'El consultor elabora, analiza y socializa reportes de avance de indicadores FED (cuantitativo y cualitativo) y ejecución de recursos FED, con desagregación departamental, provincial y distrital, en el marco del Tramo 1 hacia la primera verificación. Verbos: se elaboró, se analizó, se socializó, se reportó, se identificaron brechas.',
+  g:'El consultor realiza monitoreo continuo y reporta el estado de implementación de compromisos y acuerdos asumidos por los sectores (DIRESA, DREH, DRVCS, GRDS, GL). Verifica cumplimiento de plazos y responsables acordados. Verbos: se monitoreó, se reportó, se verificó, se dio seguimiento, se constató.',
+  h:'El consultor coordina con Gobiernos Locales firmantes del Pacto Regional la implementación de la PNDIS al 2030 (DS N°008-2022-MIDIS) y sus herramientas (Sello Municipal 10ma edición 2026, FED, Pacto Regional LLAMKANAPAQ). SÍ brinda asistencia técnica porque son herramientas propias MIDIS. Verbos: se coordinó, se brindó asistencia técnica, se orientó, se acompañó.'
+};
+
+function buildPrompt(){
+  let indsData='';
+  S.indicadores.forEach(ind=>{
+    const d=IND_DATA[ind];
+    if(d) indsData+=`\n- ${ind}: Meta=${d.m} | LB=${d.lb} | Datos Ene-Abr: ${d.d}`;
+  });
+  const evidencias=[];
+  if(S.photos.length>0) evidencias.push(`${S.photos.length} foto(s) de la actividad`);
+  if(S.actaFile) evidencias.push('acta/documento escaneado');
+  if(S.audioBlob) evidencias.push('grabación de audio');
+
+  return `Eres experto en Supervisión, Monitoreo y Acompañamiento del FED MIDIS, dominio en salud pública, educación EIB, agua y saneamiento, Huancavelica.
+
+ROL FED-MIDIS: ${ROL[S.item]||''}
+
+DATOS:
+- Ítem TDR: ${ITEM_LABELS[S.item]}
+- Fecha: ${S.fecha} ${S.hora}
+- Lugar: ${S.lugar}
+- Indicadores: ${S.indicadores.join(', ')||'generales'}
+- Actividad: ${S.descripcion}
+- Acuerdos: ${S.acuerdos||'ninguno registrado'}
+- Transcripción/notas: ${S.transcripcion||'no disponible'}
+- Adicional: ${S.adicional||'ninguno'}
+- Evidencias físicas: ${evidencias.join(', ')||'ninguna'}
+
+DATOS INDICADORES (Ene-Abr 2026):${indsData||'\nVer dashboard https://fed-wankawillka-2026.netlify.app/'}
+
+MARCO: DS N°012-2025-MIDIS · DS N°008-2022-MIDIS (PNDIS 2030) · Tramo 1: dic 2025–may 2026.
+
+GENERA exactamente 3 bloques separados por ---BLOQUE---:
+
+BLOQUE 1:
+[Título impactante negrita, máx. 10 palabras]
+[Bajada cursiva: indicador + entidad + tramo]
+
+---BLOQUE---
+
+BLOQUE 2:
+[Fecha en negrita]
+
+[Párrafo 1: contexto y rol FED — 4 oraciones]
+[Párrafo 2: desarrollo con datos concretos — 4 oraciones]
+[Párrafo 3: ficha técnica + datos estadísticos + PNDIS — 3 oraciones]
+
+---BLOQUE---
+
+BLOQUE 3:
+Referencia: [indicador + dato + norma + ficha técnica]
+Evidencia: se adjuntan ${evidencias.length>0?evidencias.join(', '):'fotos, actas y capturas'} como anexo al presente informe.
+
+Lenguaje formal MIDIS-DGIPAT. Tercera persona.`;
+}
+
+function copiarPrompt(){
+  collectData();
+  navigator.clipboard.writeText(buildPrompt()).then(()=>showToast('✅ Prompt copiado — pégalo en Claude'));
+}
+
+// ── GENERATE ──
+async function generarInforme(){
+  collectData();
+  document.getElementById('pane4').style.display='none';
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('output').classList.remove('show');
+
+  const steps=['ls1','ls2','ls3','ls4','ls5'];
+  for(let i=0;i<steps.length;i++){
+    await new Promise(r=>setTimeout(r,500));
+    if(i>0) document.getElementById(steps[i-1]).classList.replace('active','done');
+    document.getElementById(steps[i]).classList.add('active');
+  }
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:buildPrompt()}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'';
+    renderOutput(text);
+  }catch(e){
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('pane4').style.display='block';
+    showToast('⚠️ Usa "Copiar prompt" y pégalo en Claude');
+  }
+}
+
+function renderOutput(text){
+  document.getElementById('loading').classList.remove('show');
+  const parts=text.split('---BLOQUE---');
+  S.generatedText.titulo=parts[0]?.trim()||'';
+  S.generatedText.parrafo=parts[1]?.trim()||'';
+  S.generatedText.referencia=parts[2]?.trim()||'';
+
+  document.getElementById('out-titulo').textContent=S.generatedText.titulo;
+  document.getElementById('out-parrafo').textContent=S.generatedText.parrafo;
+  document.getElementById('out-referencia').textContent=S.generatedText.referencia;
+  document.getElementById('output-meta').textContent=
+    `${ITEM_LABELS[S.item]} · ${S.fecha} · ${S.indicadores.join(', ')||'indicadores generales'}`;
+
+  // Evidence preview
+  const ep=document.getElementById('evidencePreview');
+  ep.innerHTML=S.photos.map((f,i)=>{
+    const url=URL.createObjectURL(f);
+    return `<div class="ev-thumb"><img src="${url}"><div class="ev-caption">${S.photoCaptions[i]||'Foto '+(i+1)}</div></div>`;
+  }).join('');
+
+  if(S.actaFile){
+    const url=URL.createObjectURL(S.actaFile);
+    document.getElementById('actaThumb').innerHTML=`
+      <div style="border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-top:6px">
+        <img src="${url}" style="width:100%;max-height:150px;object-fit:contain;background:var(--bg3)">
+        <div style="padding:4px 8px;background:var(--bg3);font-size:10px;color:var(--text2)">📋 Acta/documento</div>
+      </div>`;
+  }
+
+  document.getElementById('output').classList.add('show');
+  for(let i=1;i<=5;i++){
+    const s=document.getElementById('step'+i);
+    s.classList.remove('active','done');
+    if(i<5) s.classList.add('done'); else s.classList.add('active');
+  }
+}
+
+// ── WORD DOWNLOAD ──
+async function descargarWord(){
+  if(!S.generatedText.titulo){ showToast('⚠️ Primero genera el informe'); return; }
+
+  showToast('⏳ Generando Word con fotos...');
+
+  try{
+    const { Document, Packer, Paragraph, TextRun, ImageRun,
+            AlignmentType, BorderStyle, WidthType, ShadingType } = docx;
+
+    function p(runs, opts){
+      return new Paragraph({
+        alignment: opts?.align||AlignmentType.BOTH,
+        spacing:{ before:opts?.before||80, after:opts?.after||80, line:360 },
+        children: Array.isArray(runs)?runs:[runs]
+      });
+    }
+    function tr(text,opts){
+      return new TextRun({text,font:'Arial',size:opts?.size||22,
+        bold:opts?.bold||false,italics:opts?.italic||false,color:opts?.color||'000000'});
+    }
+
+    const children=[];
+
+    // Header bar
+    children.push(new Paragraph({
+      spacing:{before:0,after:0},
+      shading:{fill:'1F4E79',type:ShadingType.CLEAR},
+      alignment:AlignmentType.CENTER,
+      children:[new TextRun({text:'  INFORME TÉCNICO FED MIDIS — WANKA WILLKA — HUANCAVELICA 2026  ',
+        bold:true,font:'Arial',size:20,color:'FFFFFF'})]
+    }));
+    children.push(new Paragraph({
+      spacing:{before:0,after:160},
+      shading:{fill:'2E75B6',type:ShadingType.CLEAR},
+      alignment:AlignmentType.CENTER,
+      children:[new TextRun({text:`  ${ITEM_LABELS[S.item]} · DGIPAT-MIDIS · Tramo 1 (Dic 2025 – May 2026)  `,
+        font:'Arial',size:16,color:'FFFFFF',italics:true})]
+    }));
+
+    // Título + bajada
+    const tituloLines=S.generatedText.titulo.split('\n');
+    tituloLines.forEach((line,i)=>{
+      children.push(p([tr(line,{bold:i===0,size:i===0?26:20,color:i===0?'1F4E79':'2E75B6',italic:i>0})],
+        {before:i===0?0:40,after:i===0?60:100}));
+    });
+
+    // Fecha + párrafos
+    const parrafoLines=S.generatedText.parrafo.split('\n');
+    parrafoLines.forEach(line=>{
+      if(!line.trim()) return;
+      children.push(p([tr(line,{bold:line.length<40&&!line.includes(' ')})],{before:60,after:60}));
+    });
+
+    // SECCIÓN EVIDENCIAS
+    if(S.photos.length>0||S.actaFile){
+      children.push(new Paragraph({
+        spacing:{before:160,after:80},
+        shading:{fill:'F0F4FF',type:ShadingType.CLEAR},
+        children:[new TextRun({text:'  ANEXO DE EVIDENCIAS FOTOGRÁFICAS Y DOCUMENTALES',
+          bold:true,font:'Arial',size:20,color:'1F4E79'})]
+      }));
+
+      // Insert photos
+      for(let i=0;i<S.photos.length;i++){
+        const f=S.photos[i];
+        const caption=S.photoCaptions[i]||`Fotografía ${i+1} — ${S.lugar||'Actividad de campo'}`;
+        try{
+          const arrayBuf=await f.arrayBuffer();
+          const imgType=f.type.includes('png')?'png':'jpg';
+          children.push(new Paragraph({
+            alignment:AlignmentType.CENTER,
+            spacing:{before:120,after:40},
+            children:[new ImageRun({
+              data:arrayBuf,
+              transformation:{width:420,height:280},
+              type:imgType
+            })]
+          }));
+          children.push(p([tr(`Foto ${i+1}: ${caption}`,{italic:true,size:18,color:'444444'})],
+            {align:AlignmentType.CENTER,before:0,after:100}));
+        }catch(e){
+          children.push(p([tr(`[Foto ${i+1}: ${caption}]`,{italic:true,color:'999999'})],
+            {align:AlignmentType.CENTER}));
+        }
+      }
+
+      // Insert acta
+      if(S.actaFile){
+        try{
+          const arrayBuf=await S.actaFile.arrayBuffer();
+          const imgType=S.actaFile.type.includes('png')?'png':'jpg';
+          children.push(new Paragraph({
+            spacing:{before:120,after:0},
+            children:[new TextRun({text:'Acta / Documento de respaldo:',
+              bold:true,font:'Arial',size:20,color:'1F4E79'})]
+          }));
+          children.push(new Paragraph({
+            alignment:AlignmentType.CENTER,
+            spacing:{before:80,after:40},
+            children:[new ImageRun({
+              data:arrayBuf,
+              transformation:{width:480,height:320},
+              type:imgType
+            })]
+          }));
+          children.push(p([tr(`Documento: ${S.actaFile.name}`,{italic:true,size:18,color:'444444'})],
+            {align:AlignmentType.CENTER,before:0,after:120}));
+        }catch(e){}
+      }
+    }
+
+    // Referencia + fuente
+    const refLines=S.generatedText.referencia.split('\n');
+    refLines.forEach(line=>{
+      if(line.trim()) children.push(p([tr(line,{italic:true,size:18,color:'2E75B6'})],{before:40,after:40}));
+    });
+
+    // Footer line
+    children.push(new Paragraph({
+      spacing:{before:120,after:0},
+      border:{top:{style:BorderStyle.SINGLE,size:4,color:'2E75B6'}},
+      children:[new TextRun({
+        text:`FED MIDIS · DGIPAT · Región Huancavelica · ${S.fecha} · O.S. N° 628-2026 · Tercer Entregable`,
+        font:'Arial',size:16,color:'666666',italics:true})]
+    }));
+
+    const doc=new Document({
+      styles:{default:{document:{run:{font:'Arial',size:22}}}},
+      sections:[{
+        properties:{
+          page:{size:{width:12240,height:15840},
+            margin:{top:1134,right:1134,bottom:1134,left:1134}}
+        },
+        children
+      }]
+    });
+
+    const blob=await Packer.toBlob(doc);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const fname=`${S.fecha.replace(/\s/g,'_')}_${S.item}_FED_Wanka_Willka.docx`;
+    a.href=url; a.download=fname; a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Word descargado con fotos incrustadas');
+
+  }catch(e){
+    console.error(e);
+    showToast('⚠️ Error generando Word — copia el texto manualmente');
+  }
+}
+
+// ── COPY ──
+function copySection(id,btn){
+  const t=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    btn.textContent='✓ Copiado'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('copied');},2000);
+  });
+}
+function copiarTodo(){
+  const t=document.getElementById('out-titulo').textContent+'\n\n'+
+          document.getElementById('out-parrafo').textContent+'\n\n'+
+          document.getElementById('out-referencia').textContent;
+  navigator.clipboard.writeText(t).then(()=>showToast('✅ Texto copiado'));
+}
+
+// ── RESET ──
+function nuevaActividad(){
+  S={step:1,fecha:'',hora:'',item:'',lugar:'',indicadores:[],descripcion:'',
+    acuerdos:'',transcripcion:'',adicional:'',photos:[],photoCaptions:[],
+    actaFile:null,audioBlob:null,recording:false,mediaRecorder:null,
+    timerInterval:null,seconds:0,generatedText:{titulo:'',parrafo:'',referencia:''}};
+  ['fecha','hora','lugar','descripcion','acuerdos','transcripcion'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('item').value='';
+  document.getElementById('photoGallery').innerHTML='';
+  document.getElementById('photoCount').textContent='';
+  document.getElementById('actaPreview').innerHTML='';
+  document.getElementById('audioPreview').style.display='none';
+  document.getElementById('timer').textContent='00:00';
+  document.getElementById('recordStatus').textContent='Toca para grabar';
+  document.querySelectorAll('.tag.selected').forEach(t=>t.classList.remove('selected'));
+  document.getElementById('output').classList.remove('show');
+  for(let i=1;i<=4;i++){const p=document.getElementById('pane'+i);if(p)p.style.display='none';}
+  document.getElementById('pane1').style.display='block';
+  for(let i=1;i<=5;i++){const s=document.getElementById('step'+i);s.classList.remove('active','done');}
+  document.getElementById('step1').classList.add('active');
+  S.step=1;
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Init date
+const today=new Date();
+const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+document.getElementById('fecha').value=`${today.getDate()} de ${months[today.getMonth()]} de ${today.getFullYear()}`;
+</script>
+</body>
+</html>
